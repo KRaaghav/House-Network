@@ -1,0 +1,26 @@
+name,type,location,network,ip
+HOME-RTR,router 2911,Network closet,MGMT,192.168.99.1
+SW-DOWN,switch 2960,Network closet,MGMT,192.168.99.2
+SW-UP,switch 2960,Upstairs closet,MGMT,192.168.99.3
+FAMILY-PC,PC,Living room,FAMILY,dhcp
+SMART-TV,tv,Living room,SMART-HOME,dhcp
+GAME-CONSOLE,console,Living room,SMART-HOME,dhcp
+SPEAKER-LIVING,speaker,Living room,SMART-HOME,dhcp
+FRIDGE,fridge,Kitchen,SMART-HOME,dhcp
+SPEAKER-KITCHEN,speaker,Kitchen,SMART-HOME,dhcp
+BACKYARD-CAM,camera,Kitchen,SMART-HOME,dhcp
+OFFICE-PC,PC,Office,FAMILY,dhcp
+MOM-LAPTOP,laptop,Office,FAMILY,dhcp
+PRINTER,printer,Office,FAMILY,dhcp
+DOORBELL,doorbell,Entry,SMART-HOME,dhcp
+FRONT-CAM,camera,Entry,SMART-HOME,dhcp
+THERMOSTAT,thermostat,Entry,SMART-HOME,dhcp
+GARAGE-CAM,camera,Garage,SMART-HOME,dhcp
+KID1-PC,PC,Bedroom 1,FAMILY,dhcp
+KID1-CONSOLE,console,Bedroom 1,SMART-HOME,dhcp
+KID2-LAPTOP,laptop,Bedroom 2,FAMILY,dhcp
+KID2-TV,tv,Bedroom 2,SMART-HOME,dhcp
+PARENTS-TV,tv,Main bedroom,SMART-HOME,dhcp
+DAD-LAPTOP,laptop,Main bedroom,FAMILY,dhcp
+SPEAKER-BEDROOM,speaker,Main bedroom,SMART-HOME,dhcp
+GUEST-LAPTOP,laptop,Guest room,GUEST,dhcp

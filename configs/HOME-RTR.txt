@@ -1,0 +1,160 @@
+!
+version 15.1
+service timestamps log datetime msec
+service timestamps debug datetime msec
+! ---- Hide plain text passwords in the config
+service password-encryption
+!
+! ---- Name of the device (shows in the prompt)
+hostname HOME-RTR
+!
+! ---- Password for privileged mode (enable). Stored as a hash, the real one is HomeEnable
+enable secret 5 $1$mERr$Yfk9PqhNcBC1AskpwpuI70
+!
+! ---- Local account for console and SSH logins (admin / HomeAdmin)
+username admin privilege 15 secret 5 $1$mERr$m12fbKcJYl2Omp4NlG2170
+!
+! ---- SSH setup. Needs a domain name, and "crypto key generate rsa" typed once on the device
+ip ssh version 2
+no ip domain-lookup
+ip domain-name home.lab
+!
+! ---- DHCP: the router hands out the addresses. .1 to .9 are kept for the router and switches
+ip dhcp excluded-address 192.168.10.1 192.168.10.9
+ip dhcp excluded-address 192.168.20.1 192.168.20.9
+ip dhcp excluded-address 192.168.30.1 192.168.30.9
+!
+ip dhcp pool FAMILY
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+ dns-server 198.51.100.10
+!
+ip dhcp pool SMART-HOME
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.1
+ dns-server 198.51.100.10
+!
+ip dhcp pool GUEST
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.1
+ dns-server 198.51.100.10
+!
+ip cef
+no ipv6 cef
+!
+! ---- Router on a stick: one cable to SW-DOWN, one subinterface (and gateway) per VLAN
+interface GigabitEthernet0/0
+ description Trunk to SW-DOWN Gi0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.10
+ description FAMILY
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+ ip nat inside
+!
+interface GigabitEthernet0/0.20
+ description SMART-HOME
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+ ip access-group SMART-HOME-IN in
+ ip nat inside
+!
+interface GigabitEthernet0/0.30
+ description GUEST
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.0
+ ip access-group GUEST-IN in
+ ip nat inside
+!
+interface GigabitEthernet0/0.99
+ description MGMT
+ encapsulation dot1Q 99
+ ip address 192.168.99.1 255.255.255.0
+ ip nat inside
+!
+! ---- Unused ports
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface GigabitEthernet0/2
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+! ---- WAN port: the fiber from the ISP. NAT outside and the ACL for what comes in from the internet
+interface GigabitEthernet0/0/0
+ description WAN fiber to ISP
+ ip address 203.0.113.2 255.255.255.252
+ ip access-group OUTSIDE-IN in
+ ip nat outside
+ no cdp enable
+!
+interface GigabitEthernet0/1/0
+ no ip address
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+! ---- NAT: every inside address shares the one public address (PAT)
+ip nat inside source list 1 interface GigabitEthernet0/0/0 overload
+ip classless
+! ---- Default route to the ISP
+ip route 0.0.0.0 0.0.0.0 203.0.113.1
+!
+! ---- Standard ACL 1: which inside addresses get translated by NAT
+access-list 1 permit 192.168.0.0 0.0.255.255
+! ---- Standard ACL 10: who may SSH to the router and switches (family PCs and MGMT)
+access-list 10 permit 192.168.10.0 0.0.0.255
+access-list 10 permit 192.168.99.0 0.0.0.255
+! ---- Smart home devices: internet yes, the family PCs no (only answers to them)
+ip access-list extended SMART-HOME-IN
+ permit udp any eq 68 any eq 67
+ permit icmp any 192.168.10.0 0.0.0.255 echo-reply
+ permit tcp any 192.168.10.0 0.0.0.255 established
+ deny ip any 192.168.0.0 0.0.255.255
+ permit ip any any
+! ---- Guests: only the internet, nothing in the house
+ip access-list extended GUEST-IN
+ permit udp any eq 68 any eq 67
+ permit icmp any host 192.168.30.1
+ deny ip any 192.168.0.0 0.0.255.255
+ permit ip any any
+! ---- From the internet: only answers to what the house asked for
+ip access-list extended OUTSIDE-IN
+ permit tcp any any established
+ permit udp any eq 53 any
+ permit icmp any any echo-reply
+ permit icmp any any unreachable
+ deny ip any any
+!
+! ---- Warning shown before login
+banner motd ^CHome network lab. Family devices only.^C
+!
+! ---- Console port: asks for the local username and password
+line con 0
+ exec-timeout 15 0
+ logging synchronous
+ login local
+!
+! ---- Remote access: SSH only, and only from the family VLAN and MGMT (ACL 10)
+line vty 0 4
+ access-class 10 in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+line vty 5 15
+ access-class 10 in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+!
+end

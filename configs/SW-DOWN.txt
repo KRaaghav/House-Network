@@ -1,0 +1,308 @@
+!
+version 15.0
+service timestamps log datetime msec
+service timestamps debug datetime msec
+! ---- Hide plain text passwords in the config
+service password-encryption
+!
+! ---- Name of the device (shows in the prompt)
+hostname SW-DOWN
+!
+! ---- Password for privileged mode (enable). Stored as a hash, the real one is HomeEnable
+enable secret 5 $1$mERr$Yfk9PqhNcBC1AskpwpuI70
+!
+! ---- Local account for console and SSH logins (admin / HomeAdmin)
+username admin privilege 15 secret 5 $1$mERr$m12fbKcJYl2Omp4NlG2170
+!
+! ---- SSH setup. Needs a domain name, and "crypto key generate rsa" typed once on the device
+ip ssh version 2
+no ip domain-lookup
+ip domain-name home.lab
+!
+! ---- DHCP snooping: only the uplink may answer DHCP, stops a fake DHCP server
+ip dhcp snooping vlan 10,20,30
+no ip dhcp snooping information option
+ip dhcp snooping
+!
+! ---- LLDP so "show lldp neighbors" shows what is plugged in where
+lldp run
+!
+! ---- Rapid PVST+, one fast spanning tree per VLAN
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+! ---- Ports for devices: one VLAN, port security (2 MACs, sticky), PortFast + BPDU guard
+interface FastEthernet0/1
+ description Living room - FAMILY-PC
+ switchport access vlan 10
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/2
+ description Living room - SMART-TV
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/3
+ description Living room - GAME-CONSOLE
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/4
+ description Living room - SPEAKER-LIVING
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/5
+ description Kitchen - FRIDGE
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/6
+ description Kitchen - SPEAKER-KITCHEN
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/7
+ description Kitchen - BACKYARD-CAM
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/8
+ description Office - OFFICE-PC
+ switchport access vlan 10
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/9
+ description Office - MOM-LAPTOP
+ switchport access vlan 10
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/10
+ description Office - PRINTER
+ switchport access vlan 10
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/11
+ description Entry - DOORBELL
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/12
+ description Entry - FRONT-CAM
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/13
+ description Entry - THERMOSTAT
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/14
+ description Garage - GARAGE-CAM
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ ip dhcp snooping limit rate 15
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+! ---- Unused ports: put in parking VLAN 998 and shut down
+interface FastEthernet0/15
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/21
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 998
+ switchport mode access
+ shutdown
+!
+! ---- Trunk ports: native VLAN 999 (unused), only the house VLANs allowed, DTP off
+interface GigabitEthernet0/1
+ description Trunk to HOME-RTR Gi0/0
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+ ip dhcp snooping trust
+!
+interface GigabitEthernet0/2
+ description Trunk to SW-UP Gi0/1
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+!
+! ---- VLAN 1 is not used
+interface Vlan1
+ no ip address
+ shutdown
+!
+! ---- Management address of this switch (MGMT VLAN)
+interface Vlan99
+ description MGMT - SW-DOWN
+ ip address 192.168.99.2 255.255.255.0
+!
+! ---- Gateway for the switch itself, so it can be managed from the family VLAN
+ip default-gateway 192.168.99.1
+!
+! ---- Standard ACL 10: who may SSH in (family PCs and MGMT)
+access-list 10 permit 192.168.10.0 0.0.0.255
+access-list 10 permit 192.168.99.0 0.0.0.255
+!
+! ---- Warning shown before login
+banner motd ^CHome network lab. Family devices only.^C
+!
+! ---- Console port: asks for the local username and password
+line con 0
+ exec-timeout 15 0
+ logging synchronous
+ login local
+!
+! ---- Remote access: SSH only, and only from the family VLAN and MGMT (ACL 10)
+line vty 0 4
+ access-class 10 in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+line vty 5 15
+ access-class 10 in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+!
+end
